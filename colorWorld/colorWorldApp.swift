@@ -8,10 +8,10 @@
 import SwiftUI
 
 @main
-struct colorWorldApp: App {
+struct ColorWorldApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomepageView()
         }
     }
 }
