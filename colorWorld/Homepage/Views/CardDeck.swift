@@ -12,18 +12,21 @@ struct CardDeck: View {
     var body: some View {
         ZStack {
             ForEach(0..<min(deck.cards.count, 6), id: \.self) { index in
-                let totalCards = min(deck.cards.count, 6)
-                let spread: Double = 30
-                let angleStep = spread / Double(totalCards - 1)
-                let baseAngle = -spread / 2
+                let totalCards = min(deck.cards.count, 6) // Número de cartas en el abanico
+                let maxAngle: Double = 40 // Ángulo total del abanico (en grados)
+                let angleStep = maxAngle / Double(totalCards - 1) // Espaciado angular
+                let baseAngle = -maxAngle / 2 // Ángulo inicial (centro del abanico)
+                // Calcular ángulo para cada carta
                 let angle = baseAngle + angleStep * Double(index)
-                let xOffset = Double(index - (totalCards / 2)) * 40
-                let yOffset = Double(index) * 15
+                // Calcular posición usando seno y coseno
+                let radius: Double = 150 // Radio del abanico
+                let xOffset = radius * sin(angle * .pi / 180) * 3 // Conversión a radianes
                 ColorCard(card: deck.cards[index])
-                    .rotationEffect(.degrees(angle))
-                    .offset(x: xOffset, y: yOffset)
+                    .rotationEffect(.degrees(angle)) // Rotación de la carta
+                    .offset(x: xOffset ) // Posición ajustada
             }
         }
+        .frame(width: 400, height: 300)
     }
 }
 
