@@ -29,9 +29,22 @@
 		61791F312D13699F005ECECF /* colorWorldUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = colorWorldUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		61791F992D23579B005ECECF /* Exceptions for "colorWorld" folder in "colorWorld" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 61791F162D13699D005ECECF /* colorWorld */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		61791F192D13699D005ECECF /* colorWorld */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				61791F992D23579B005ECECF /* Exceptions for "colorWorld" folder in "colorWorld" target */,
+			);
 			path = colorWorld;
 			sourceTree = "<group>";
 		};
@@ -419,9 +432,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"colorWorld/Preview Content\"";
+				DEVELOPMENT_TEAM = Y4M8Q7FFFV;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = colorWorld/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires camera access to take pictures <3";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app wants to access your photo library so you can upload pictures.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -448,9 +465,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"colorWorld/Preview Content\"";
+				DEVELOPMENT_TEAM = Y4M8Q7FFFV;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = colorWorld/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires camera access to take pictures <3";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app wants to access your photo library so you can upload pictures.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
