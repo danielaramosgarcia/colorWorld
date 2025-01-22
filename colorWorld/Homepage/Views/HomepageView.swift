@@ -17,11 +17,25 @@ struct HomepageView: View {
                     .background()
                 VStack {
                     Spacer()
-                    Text("ColorWorld")
-                        .bold()
-                        .font(.largeTitle)
+
+                            Text("ColorWorld")
+                                .font(.system(size: 70, weight: .bold))
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [.red, .blue, .green, .yellow]),
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .blur(radius: 5)
+                                .overlay(
+                                    Text("ColorWorld")
+                                        .font(.system(size: 70, weight: .bold))
+                                            .foregroundColor(.white)
+                                )
+
                     Spacer()
-                    CardDeck()
+                    CardDeck(deck: CardDeckModel.demoDeck)
                     Spacer()
                     NavigationLink(destination: CameraView()) {
                         HStack {

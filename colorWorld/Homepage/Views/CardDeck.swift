@@ -8,12 +8,25 @@
 import SwiftUI
 
 struct CardDeck: View {
-//    let card: CardModel
+    let deck: CardDeckModel
     var body: some View {
-        ColorCard(titulo: "hola")
+        ZStack {
+            ForEach(0..<min(deck.cards.count, 6), id: \.self) { index in
+                let totalCards = min(deck.cards.count, 6)
+                let spread: Double = 30
+                let angleStep = spread / Double(totalCards - 1)
+                let baseAngle = -spread / 2
+                let angle = baseAngle + angleStep * Double(index)
+                let xOffset = Double(index - (totalCards / 2)) * 40
+                let yOffset = Double(index) * 15
+                ColorCard(card: deck.cards[index])
+                    .rotationEffect(.degrees(angle))
+                    .offset(x: xOffset, y: yOffset)
+            }
+        }
     }
 }
 
-// #Preview {
-//    CardDeck(card: <#T##CardModel#>.)
-// }
+ #Preview {
+     CardDeck(deck: CardDeckModel.demoDeck)
+ }
