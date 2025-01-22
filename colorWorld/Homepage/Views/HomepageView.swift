@@ -21,23 +21,24 @@ struct HomepageView: View {
                         .bold()
                         .font(.largeTitle)
                     Spacer()
-                    ColorCard()
+                    CardDeck()
                     Spacer()
                     NavigationLink(destination: CameraView()) {
                         HStack {
-                            Image(systemName: "camera.fill") // Ícono de cámara
-                                .font(.title)               // Tamaño del ícono
-                                .foregroundColor(.black)    // Color del ícono
+                            Image(systemName: "camera.fill")
+                                .font(.title)
+                                .foregroundColor(.black)
                             Text("Add Drawing")
-                                .font(.title)               // Tamaño de la fuente
+                                .font(.title)
                                 .foregroundStyle(
-                                    LinearGradient(gradient: Gradient(colors: [.red, .blue, .green]), startPoint: .leading, endPoint: .trailing)
-                                )                           // Letras de colores con gradiente
+                                    LinearGradient(gradient: Gradient(colors:
+                                        [.red, .blue, .green]), startPoint: .leading, endPoint: .trailing)
+                                )
                         }
                         .padding()
-                        .background(Color.white)            // Fondo blanco
-                        .cornerRadius(30)                   // Bordes redondeados
-                        .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4) // Efecto de sombra
+                        .background(Color.white)
+                        .cornerRadius(30)
+                        .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
                     }
                     .padding(.top, 20)
 

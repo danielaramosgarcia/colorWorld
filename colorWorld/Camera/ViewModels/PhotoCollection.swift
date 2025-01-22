@@ -157,27 +157,26 @@ class PhotoCollection: NSObject, ObservableObject {
         }
     }
 
-    func removeAll() async throws {
-        guard let assetCollection = self.assetCollection else {
-            throw PhotoCollectionError.missingAssetCollection
-        }
-
-        do {
-            try await PHPhotoLibrary.shared().performChanges {
-                if let albumChangeRequest = PHAssetCollectionChangeRequest(for: assetCollection) {
-                    if let assets = PHAsset.fetchAssets(in: assetCollection, options: nil) as? PHFetchResult<PHAsset> {
-                        albumChangeRequest.removeAssets(assets)
-                    }
-                }
-            }
-
-            await refreshPhotoAssets()
-
-        } catch let error {
-            logger.error("Error removing all photos from the album: \(error.localizedDescription)")
-            throw PhotoCollectionError.removeAllError(error)
-        }
-    }
+//    func removeAll() async throws {
+//        guard let assetCollection = self.assetCollection else {
+//            throw PhotoCollectionError.missingAssetCollection
+//        }
+//
+//        do {
+//            try await PHPhotoLibrary.shared().performChanges {
+//                if let albumChangeRequest = PHAssetCollectionChangeRequest(for: assetCollection),
+//                    let assets = (PHAsset.fetchAssets(in: assetCollection, options: nil) as AnyObject?) as! PHFetchResult<AnyObject>? {
+//                    albumChangeRequest.removeAssets(assets)
+//                }
+//            }
+//
+//            await refreshPhotoAssets()
+//
+//        } catch let error {
+//            logger.error("Error removing all photos from the album: \(error.localizedDescription)")
+//            throw PhotoCollectionError.removeAllError(error)
+//        }
+//    }
 
     private func refreshPhotoAssets(_ fetchResult: PHFetchResult<PHAsset>? = nil) async {
 
