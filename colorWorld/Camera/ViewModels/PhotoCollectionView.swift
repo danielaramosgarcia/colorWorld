@@ -17,7 +17,7 @@ struct PhotoCollectionView: View {
 
     @Environment(\.displayScale) private var displayScale
 
-    private static let itemSpacing = 12.0
+    private static let itemSpacing = 10.0
     private static let itemCornerRadius = 15.0
     private static let itemSize = CGSize(width: 90, height: 90)
 

@@ -13,6 +13,12 @@ import SwiftUI
 
 struct ThumbnailView: View {
     var image: Image?
+    var size: CGFloat
+
+    init(image: Image? = nil, size: CGFloat = 41) {
+        self.size = size
+        self.image = image
+    }
 
     var body: some View {
         ZStack {
@@ -23,7 +29,7 @@ struct ThumbnailView: View {
                     .scaledToFill()
             }
         }
-        .frame(width: 41, height: 41)
+        .frame(width: size, height: size)
         .cornerRadius(11)
     }
 }
