@@ -6,14 +6,15 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ColorCard: View {
-    let card: CardModel
-
+    let card: SampleModel
     var body: some View {
         ZStack {
-            Image(card.img!)
+            Image(uiImage: (card.img == nil ? Constants.placeholder : card.img)!)
                 .resizable()
+                .scaledToFit()
                 .padding()
             VStack {
                 Text(card.name)
@@ -44,5 +45,5 @@ struct ColorCard: View {
 }
 
 #Preview {
-    ColorCard(card: CardModel.boobie)
+    ColorCard(card: SampleModel(id: 1, name: "hola"))
 }

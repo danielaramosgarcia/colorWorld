@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct ColorWorldApp: App {
@@ -13,5 +14,6 @@ struct ColorWorldApp: App {
         WindowGroup {
             HomepageView()
         }
+        .modelContainer(for: SampleModel.self)
     }
 }

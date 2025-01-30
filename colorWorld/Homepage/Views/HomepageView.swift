@@ -6,9 +6,9 @@
 //
 
 import SwiftUI
+import _SwiftData_SwiftUI
 
 struct HomepageView: View {
-    @StateObject private var model = DataModel()
 
     var body: some View {
         NavigationStack {
@@ -17,47 +17,35 @@ struct HomepageView: View {
                     .ignoresSafeArea()
                     .background()
                 VStack {
-                    Spacer()
-
-                    Text("ColorWorld")
-                        .font(.system(size: 60, weight: .bold))
-                        .foregroundStyle(
-                            LinearGradient(
-                                gradient: Gradient(colors: [.red, .blue, .green, .yellow]),
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .blur(radius: 5)
-                        .overlay(
-                            Text("ColorWorld")
-                                .font(.system(size: 60, weight: .bold))
-                                .foregroundColor(.white)
-                        )
-                    Spacer()
-                    CardDeck(deck: CardDeckModel.demoDeck)
-                    Spacer()
                     HStack {
-                        NavigationLink {
-                            PhotoCollectionView(photoCollection: model.photoCollection)
-                                .onAppear {
-                                    model.camera.isPreviewPaused = true
-                                }
-                                .onDisappear {
-                                    model.camera.isPreviewPaused = false
-                                }
-                        } label: {
-                            VStack(spacing: 10) { // Stack vertically with some spacing
-                                ThumbnailView(image: model.thumbnailImage, size: 60)
-                                Text("Gallery")
-                                    .font(.title2)
-                                    .foregroundColor(.primary)
-                            }
-                            .padding( .top, 20) // Add horizontal padding
-                            .offset(x: -30)
-                        }
+                        Text("ColorWorld")
+                            .font(.system(size: 60, weight: .bold))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [.red, .blue, .green, .yellow]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .blur(radius: 5)
+                            .overlay(
+                                Text("ColorWorld")
+                                    .font(.system(size: 60, weight: .bold))
+                                    .foregroundColor(.white)
+                            )
+                            .padding(.top, 20)
 
-                        NavigationLink(destination: CameraView()) {
+                        Spacer()
+                        Button(action: {print("hola")}) {
+                            Image(systemName: "info.circle")
+                                .font(.title)
+                                .foregroundColor(.blue)
+                        }
+                    }                            .padding(.horizontal, 60)
+                    Spacer()
+                        Deck()
+                    Spacer()
+                    NavigationLink(destination: CameraView()) {
                             HStack {
                                 Image(systemName: "camera.fill")
                                     .font(.title)
@@ -74,20 +62,15 @@ struct HomepageView: View {
                             .cornerRadius(30)
                             .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
                         }
-                    }
                     Spacer()
 
                 }
             }
-        }
-        .task {
-            await model.camera.start()
-            await model.loadPhotos()
-            await model.loadThumbnail()
         }
     }
     }
 
 #Preview {
     HomepageView()
+        .modelContainer(SampleModel.preview)
 }
