@@ -7,8 +7,13 @@
 
 import SwiftUI
 import _SwiftData_SwiftUI
+import PhotosUI
 
 struct HomepageView: View {
+    @State private var selectedCard: Int? // Guarda el índice de la carta seleccionada
+    @State private var selectedCardModel: SampleModel? // Guarda el índice de la carta seleccionada
+    @State var viewModel: UpdateEditFormViewModel
+    @State private var imagePicker = ImagePicker()
 
     var body: some View {
         NavigationStack {
@@ -36,32 +41,73 @@ struct HomepageView: View {
                             .padding(.top, 20)
 
                         Spacer()
-                        Button(action: {print("hola")}) {
-                            Image(systemName: "info.circle")
-                                .font(.title)
-                                .foregroundColor(.blue)
+                        if selectedCard == nil {
+                            Button(action: {
+                                print("hola")
+                            }
+                            ) {
+                                Image(systemName: "info.circle")
+                                    .font(.title)
+                                    .foregroundColor(.black)
+                            }
                         }
                     }                            .padding(.horizontal, 60)
                     Spacer()
-                        Deck()
+//                    if selectedCard == nil {
+                        Deck(selectedCard: $selectedCard)
+//                    if selectedCard != nil {
+//                        ColorCard(card: SampleModel(id: 1, name: "hola"))
+//                            .scaleEffect(1.3)
+//                    }
                     Spacer()
-                    NavigationLink(destination: CameraView()) {
-                            HStack {
-                                Image(systemName: "camera.fill")
-                                    .font(.title)
-                                    .foregroundColor(.black)
-                                Text("Add Photo")
-                                    .font(.title)
-                                    .foregroundStyle(
-                                        LinearGradient(gradient: Gradient(colors:
-                                            [.red, .blue, .green]), startPoint: .leading, endPoint: .trailing)
-                                    )
+                    if selectedCard == nil {
+
+                        HStack {
+                            NavigationLink(destination: CameraView()) {
+                                HStack {
+                                    Image(systemName: "camera.fill")
+                                        .font(.title)
+                                        .foregroundColor(.black)
+                                    Text("Add photo")
+                                        .font(.title)
+                                        .foregroundStyle(
+                                            LinearGradient(gradient: Gradient(colors:
+                                        [.red, .blue, .green]), startPoint: .leading, endPoint: .trailing)
+                                        )
+                                }
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(30)
+                                .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
                             }
-                            .padding()
-                            .background(Color.white)
-                            .cornerRadius(30)
-                            .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
+
+                                HStack {
+                                    Image(systemName: "photo")
+                                        .font(.title)
+                                        .foregroundColor(.black)
+                                    Text("Select photo")
+                                        .font(.title)
+                                        .foregroundStyle(
+                                            LinearGradient(gradient: Gradient(colors:
+                                        [ .green, .blue, .red]), startPoint: .leading, endPoint: .trailing)
+                                        )
+                                }
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(30)
+                                .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
+                                .padding(.leading, 15)
+                                .overlay {
+                                    PhotosPicker(selection: $imagePicker.imageSelection) {
+                                        Color.clear
+                                    }
+                                    .onTapGesture {
+                                        imagePicker.setup(viewModel)
+                                    }
+                                }
+
                         }
+                    }
                     Spacer()
 
                 }
@@ -71,6 +117,6 @@ struct HomepageView: View {
     }
 
 #Preview {
-    HomepageView()
+    HomepageView(viewModel: UpdateEditFormViewModel())
         .modelContainer(SampleModel.preview)
 }
