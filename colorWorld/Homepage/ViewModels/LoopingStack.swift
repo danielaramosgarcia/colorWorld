@@ -29,6 +29,8 @@ struct LoopingStack<Content: View>: View {
                         view
                     }
                     .zIndex(selectedCard == index ? 100 : zIndex) // Trae la carta seleccionada al frente
+                    .opacity(selectedCard == nil || selectedCard == index ? 1 : 0) // Hide unselected cards
+                    .animation(.easeInOut(duration: 0.4), value: selectedCard)
                 }
             }
         }
@@ -64,7 +66,7 @@ private struct LoopingStackCardView<Content: View>: View {
             .offset(x: offset)
             .animation(.smooth(duration: 0.25, extraBounce: 0), value: index)
             .rotation3DEffect(.init(degrees: selectedCard == index ? 0 : rotation), axis: (0, 1, 0), anchor: .center, perspective: 0.5)
-            .scaleEffect(selectedCard == index ? 1.3 : 1) // Aumenta tamaño si está seleccionada
+            .scaleEffect(selectedCard == index ? 1.6 : 1) // Aumenta tamaño si está seleccionada
             .shadow(radius: selectedCard == index ? 10 : 5)
             .gesture(
                 DragGesture()

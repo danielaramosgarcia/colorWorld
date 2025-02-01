@@ -15,10 +15,10 @@ class ImagePicker {
     var image: Image?
     var images: [Image] = []
 
-    var vm: UpdateEditFormViewModel?
+    var viewModel: UpdateEditFormViewModel?
 
-    func setup(_ vm: UpdateEditFormViewModel) {
-        self.vm = vm
+    func setup(_ viewModel: UpdateEditFormViewModel) {
+        self.viewModel = viewModel
     }
     var imageSelection: PhotosPickerItem? {
         didSet {
@@ -34,7 +34,7 @@ class ImagePicker {
     func loadTransferable(from imageSelection: PhotosPickerItem?) async throws {
         do {
             if let data = try await imageSelection?.loadTransferable(type: Data.self) {
-                vm?.data = data
+                viewModel?.data = data
                 if let uiImage = UIImage(data: data) {
                     self.image = Image(uiImage: uiImage)
                 }

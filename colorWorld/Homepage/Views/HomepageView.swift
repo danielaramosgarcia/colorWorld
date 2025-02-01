@@ -12,11 +12,13 @@ import PhotosUI
 struct HomepageView: View {
     @State private var selectedCard: Int? // Guarda el índice de la carta seleccionada
     @State private var selectedCardModel: SampleModel? // Guarda el índice de la carta seleccionada
-    @State var viewModel: UpdateEditFormViewModel
+    @State var viewModel: UpdateEditFormViewModel = UpdateEditFormViewModel()
     @State private var imagePicker = ImagePicker()
+    @State private var path: [SampleModel] = []
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ZStack {
                 Gradiant()
                     .ignoresSafeArea()
@@ -101,11 +103,65 @@ struct HomepageView: View {
                                     PhotosPicker(selection: $imagePicker.imageSelection) {
                                         Color.clear
                                     }
-                                    .onTapGesture {
-                                        imagePicker.setup(viewModel)
+                                }
+                                .onChange(of: imagePicker.imageSelection) { newSelection in
+                                    Task {
+                                        if let newSelection {
+                                            do {
+                                                // Cargar la imagen seleccionada
+                                                try await imagePicker.loadTransferable(from: newSelection)
+
+                                                if viewModel.image != Constants.placeholder && viewModel.image != nil {
+                                                    let newSample = SampleModel(id: UUID(), name: "New drawing")
+                                                    newSample.data = viewModel.image.jpegData(compressionQuality: 0.8)
+                                                    modelContext.insert(newSample)
+                                                }
+                                            } catch {
+                                                print("Error cargando la imagen: \(error.localizedDescription)")
+                                            }
+                                        }
                                     }
                                 }
 
+                        }
+                        .onAppear {
+                            imagePicker.setup(viewModel)
+                        }
+                    } else {
+                        HStack{
+                                HStack {
+                                    Image(systemName: "paintbrush.fill")
+                                        .font(.title)
+                                        .foregroundColor(.black)
+                                    Text("Edit")
+                                        .font(.title)
+                                        .foregroundStyle(
+                                            LinearGradient(gradient: Gradient(colors:
+                                                                                [.red, .blue, .green]), startPoint: .leading, endPoint: .trailing)
+                                        )
+                                }
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(30)
+                                .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
+                            
+                            HStack {
+                                Image(systemName: "trash.fill")
+                                    .font(.title)
+                                    .foregroundColor(.black)
+                                Text("Delete")
+                                    .font(.title)
+                                    .foregroundStyle(
+                                        LinearGradient(gradient: Gradient(colors:
+                                                                            [ .green, .blue, .red]), startPoint: .leading, endPoint: .trailing)
+                                    )
+                            }
+                            .padding()
+                            .background(Color.white)
+                            .cornerRadius(30)
+                            .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
+                            .padding(.leading, 15)
+                            
                         }
                     }
                     Spacer()
@@ -114,6 +170,7 @@ struct HomepageView: View {
             }
         }
     }
+
     }
 
 #Preview {

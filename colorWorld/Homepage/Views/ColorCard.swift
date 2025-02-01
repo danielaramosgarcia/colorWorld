@@ -45,5 +45,5 @@ struct ColorCard: View {
 }
 
 #Preview {
-    ColorCard(card: SampleModel(id: 1, name: "hola"))
+    ColorCard(card: SampleModel(id: UUID(), name: "hola"))
 }

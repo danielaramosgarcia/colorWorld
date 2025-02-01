@@ -11,7 +11,7 @@ import SwiftData
 
 @Model
 class SampleModel {
-    var id: Int
+    var id: UUID
     var name: String
     @Attribute(.externalStorage)
     var data: Data?
@@ -22,7 +22,7 @@ class SampleModel {
             return nil
         }
     }
-    init(id: Int, name: String, data: Data? = nil) {
+    init(id: UUID, name: String, data: Data? = nil) {
         self.id = id
         self.name = name
         self.data = data
@@ -39,10 +39,10 @@ extension SampleModel {
             let noCardsImage = UIImage(named: "boobie")
             let noCardsData = noCardsImage?.jpegData(compressionQuality: 1.0)
             let samples: [SampleModel] = [
-                .init(id: 1, name: "Boobie goods", data: noCardsData),
-                .init(id: 2, name: "Peonias", data: peoniesData), // Asignamos data
-                .init(id: 3, name: "Relajacion total"),
-                .init(id: 4, name: "Boobie", data: noCardsData)
+                .init(id: UUID(), name: "Boobie goods", data: noCardsData),
+                .init(id: UUID(), name: "Peonias", data: peoniesData), // Asignamos data
+                .init(id: UUID(), name: "Relajacion total"),
+                .init(id: UUID(), name: "Boobie", data: noCardsData)
 
             ]
             samples.forEach {

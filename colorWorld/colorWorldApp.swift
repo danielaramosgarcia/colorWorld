@@ -12,7 +12,7 @@ import SwiftData
 struct ColorWorldApp: App {
     var body: some Scene {
         WindowGroup {
-            HomepageView(viewModel: UpdateEditFormViewModel())
+            HomepageView()
         }
 //        .modelContainer(for: SampleModel.self)
         .modelContainer(SampleModel.preview)
