@@ -10,12 +10,12 @@ import _SwiftData_SwiftUI
 import PhotosUI
 
 struct HomepageView: View {
-    @State private var selectedCard: Int? // Guarda el índice de la carta seleccionada
-    @State private var selectedCardModel: SampleModel? // Guarda el índice de la carta seleccionada
+    @State private var selectedCard: Int?
+    @State private var selectedCardModel: SampleModel?
     @State var viewModel: UpdateEditFormViewModel = UpdateEditFormViewModel()
     @State private var imagePicker = ImagePicker()
-    @State private var path: [SampleModel] = []
-    @Environment(\.modelContext) private var modelContext
+    @State private var path: [SampleModel] = [] // Navigation path
+    @State private var selectedImage: SampleModel? // Store selected image
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -82,7 +82,7 @@ struct HomepageView: View {
                                 .cornerRadius(30)
                                 .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
                             }
-
+                            NavigationLink(destination: SelectedImage()) {
                                 HStack {
                                     Image(systemName: "photo")
                                         .font(.title)
@@ -91,7 +91,7 @@ struct HomepageView: View {
                                         .font(.title)
                                         .foregroundStyle(
                                             LinearGradient(gradient: Gradient(colors:
-                                        [ .green, .blue, .red]), startPoint: .leading, endPoint: .trailing)
+                                                [ .green, .blue, .red]), startPoint: .leading, endPoint: .trailing)
                                         )
                                 }
                                 .padding()
@@ -108,27 +108,27 @@ struct HomepageView: View {
                                     Task {
                                         if let newSelection {
                                             do {
-                                                // Cargar la imagen seleccionada
                                                 try await imagePicker.loadTransferable(from: newSelection)
-
                                                 if viewModel.image != Constants.placeholder && viewModel.image != nil {
-                                                    let newSample = SampleModel(id: UUID(), name: "New drawing")
+                                                    let newSample = SampleModel(id: UUID(), name: "Name")
                                                     newSample.data = viewModel.image.jpegData(compressionQuality: 0.8)
-                                                    modelContext.insert(newSample)
+                                                    path.append(newSample)
+
                                                 }
+
                                             } catch {
-                                                print("Error cargando la imagen: \(error.localizedDescription)")
+                                                print("Error loading image: \(error.localizedDescription)")
                                             }
                                         }
                                     }
                                 }
-
+                            }
                         }
                         .onAppear {
                             imagePicker.setup(viewModel)
                         }
                     } else {
-                        HStack{
+                        HStack {
                                 HStack {
                                     Image(systemName: "paintbrush.fill")
                                         .font(.title)
@@ -137,14 +137,14 @@ struct HomepageView: View {
                                         .font(.title)
                                         .foregroundStyle(
                                             LinearGradient(gradient: Gradient(colors:
-                                                                                [.red, .blue, .green]), startPoint: .leading, endPoint: .trailing)
+                                                        [.red, .blue, .green]), startPoint: .leading, endPoint: .trailing)
                                         )
                                 }
                                 .padding()
                                 .background(Color.white)
                                 .cornerRadius(30)
                                 .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
-                            
+
                             HStack {
                                 Image(systemName: "trash.fill")
                                     .font(.title)
@@ -153,7 +153,7 @@ struct HomepageView: View {
                                     .font(.title)
                                     .foregroundStyle(
                                         LinearGradient(gradient: Gradient(colors:
-                                                                            [ .green, .blue, .red]), startPoint: .leading, endPoint: .trailing)
+                                                [ .green, .blue, .red]), startPoint: .leading, endPoint: .trailing)
                                     )
                             }
                             .padding()
@@ -161,12 +161,15 @@ struct HomepageView: View {
                             .cornerRadius(30)
                             .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
                             .padding(.leading, 15)
-                            
+
                         }
                     }
                     Spacer()
 
                 }
+            }
+            .navigationDestination(for: SampleModel.self) { selectedImage in
+                SelectedImage(image: selectedImage) // Pass Image
             }
         }
     }
