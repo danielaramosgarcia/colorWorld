@@ -10,7 +10,7 @@ import UIKit
 
 @Observable
 class UpdateEditFormViewModel {
-    var id: Int = 0
+    var id: UUID = UUID()
     var name: String = ""
     var data: Data?
     var sample: SampleModel?

@@ -10,6 +10,8 @@ import SwiftData
 
 struct ColorCard: View {
     let card: SampleModel
+    @Binding var selectedCard: Int?
+    @Binding var selectedModel: SampleModel?
     var body: some View {
         ZStack {
             Image(uiImage: (card.img == nil ? Constants.placeholder : card.img)!)
@@ -41,9 +43,12 @@ struct ColorCard: View {
             y: 5
         )
         .padding(1)
+
     }
 }
 
 #Preview {
-    ColorCard(card: SampleModel(id: UUID(), name: "hola"))
+    @State var previewSelectedCard: Int?
+    @State var previewSelectedModel: SampleModel?
+    ColorCard(card: SampleModel(id: UUID(), name: "hola"), selectedCard: $previewSelectedCard, selectedModel: $previewSelectedModel)
 }

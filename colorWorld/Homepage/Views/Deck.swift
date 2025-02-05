@@ -10,25 +10,27 @@ import _SwiftData_SwiftUI
 
 struct Deck: View {
     @Query(sort: \SampleModel.name) var samples: [SampleModel]
-    @Binding var selectedCard: Int? // Recibe el estado desde HomepageView
+    @Binding var selectedCard: Int?
+    @Binding var selectedModel: SampleModel?
 
     var body: some View {
 //        NavigationStack {
             VStack {
                 LoopingStack(maxTranslationWidth: 200, selectedCard: $selectedCard) {
                         ForEach(samples) { card in
-                            ColorCard(card: card)
+                            ColorCard(card: card, selectedCard: $selectedCard, selectedModel: $selectedModel)
+
+                                }
                         }
                     }
             }
 //        }
     }
-}
 
 #Preview {
-    @State var previewSelectedCard: Int? // Estado de prueba para la selección
-
-    Deck(selectedCard: $previewSelectedCard)
+    @State var previewSelectedCard: Int?
+    @State var previewSelectedModel: SampleModel?
+    Deck(selectedCard: $previewSelectedCard, selectedModel: $previewSelectedModel)
     .modelContainer(SampleModel.preview)
 
 }

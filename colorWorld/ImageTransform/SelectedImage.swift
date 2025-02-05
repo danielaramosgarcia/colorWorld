@@ -20,13 +20,13 @@ struct SelectedImage: View {
             if image != nil && image?.img != nil {
                 Image(uiImage: (image?.img == nil ? Constants.placeholder : image?.img)!)
                 .resizable()
-                .clipShape(RoundedRectangle(cornerRadius: 20)) // Redondea los bordes
+                .clipShape(RoundedRectangle(cornerRadius: 20))
                 .scaledToFit()
-                .padding(80) // Margen alrededor de la imagen
-                .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5) // Sombra suave
+                .padding(80)
+                .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 20) // Un poco más grande que la imagen
-                        .stroke(Color.white, lineWidth: 10) // Margen blanco
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(Color.white, lineWidth: 10)
                         .padding(76)
                 )
             } else {
@@ -36,11 +36,6 @@ struct SelectedImage: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button("Cancel") {
-                    dismiss()
-                }
-            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     modelContext.insert(image!)

@@ -6,7 +6,6 @@ struct LoopingStack<Content: View>: View {
     @Binding var selectedCard: Int?
     @ViewBuilder var content: Content
     @State private var rotation: Int = 0
-
     var body: some View {
         Group(subviews: content) { collection in
             let collection = collection.rotateFromLeft(by: rotation)
@@ -24,7 +23,7 @@ struct LoopingStack<Content: View>: View {
                         visibleCardsCount: visibleCardsCount,
                         maxTranslationWidth: maxTranslationWidth,
                         rotation: $rotation,
-                        selectedCard: $selectedCard // Pasamos el estado de selección
+                        selectedCard: $selectedCard
                     ) {
                         view
                     }
@@ -46,7 +45,6 @@ private struct LoopingStackCardView<Content: View>: View {
     @Binding var rotation: Int
     @Binding var selectedCard: Int? // Estado para manejar la carta seleccionada
     @ViewBuilder var content: Content
-
     @State private var offset: CGFloat = .zero
     @State private var viewSize: CGSize = .zero
 
@@ -57,7 +55,7 @@ private struct LoopingStackCardView<Content: View>: View {
         let cardRotation = baseRotation + (maxRotation / CGFloat(visibleCardsCount - 1)) * CGFloat(index)
         let horizontalOffset = -maxSpacing + (maxSpacing * 2 / CGFloat(visibleCardsCount - 1)) * CGFloat(index)
 
-        let rotation = max(min(-offset / viewSize.width, 1), 0) * -30
+        let rotationValue = max(min(-offset / viewSize.width, 1), 0) * -30
 
         content
             .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { viewSize = $0 })
@@ -65,7 +63,7 @@ private struct LoopingStackCardView<Content: View>: View {
             .offset(x: selectedCard == index ? 0 : horizontalOffset, y: selectedCard == index ? 0 : CGFloat(index) * -5)
             .offset(x: offset)
             .animation(.smooth(duration: 0.25, extraBounce: 0), value: index)
-            .rotation3DEffect(.init(degrees: selectedCard == index ? 0 : rotation), axis: (0, 1, 0), anchor: .center, perspective: 0.5)
+            .rotation3DEffect(.init(degrees: selectedCard == index ? 0 : rotationValue), axis: (0, 1, 0), anchor: .center, perspective: 0.5)
             .scaleEffect(selectedCard == index ? 1.6 : 1) // Aumenta tamaño si está seleccionada
             .shadow(radius: selectedCard == index ? 10 : 5)
             .gesture(
@@ -127,7 +125,8 @@ extension [SubviewsCollection.Element] {
 
 #Preview {
     @State var previewSelectedCard: Int? // Estado de prueba para la selección
+    @State var previewSelectedModel: SampleModel? // Estado de prueba para la selección
 
-    Deck(selectedCard: $previewSelectedCard)
+    Deck(selectedCard: $previewSelectedCard, selectedModel: $previewSelectedModel)
     .modelContainer(SampleModel.preview)
 }

@@ -14,8 +14,8 @@ struct HomepageView: View {
     @State private var selectedCardModel: SampleModel?
     @State var viewModel: UpdateEditFormViewModel = UpdateEditFormViewModel()
     @State private var imagePicker = ImagePicker()
-    @State private var path: [SampleModel] = [] // Navigation path
-    @State private var selectedImage: SampleModel? // Store selected image
+    @State private var path: [SampleModel] = []
+    @State private var selectedModel: SampleModel?
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -55,12 +55,7 @@ struct HomepageView: View {
                         }
                     }                            .padding(.horizontal, 60)
                     Spacer()
-//                    if selectedCard == nil {
-                        Deck(selectedCard: $selectedCard)
-//                    if selectedCard != nil {
-//                        ColorCard(card: SampleModel(id: 1, name: "hola"))
-//                            .scaleEffect(1.3)
-//                    }
+                    Deck(selectedCard: $selectedCard, selectedModel: $selectedModel)
                     Spacer()
                     if selectedCard == nil {
 
@@ -127,6 +122,7 @@ struct HomepageView: View {
                         .onAppear {
                             imagePicker.setup(viewModel)
                         }
+                        .padding(.bottom, 80)
                     } else {
                         HStack {
                                 HStack {
@@ -161,15 +157,20 @@ struct HomepageView: View {
                             .cornerRadius(30)
                             .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
                             .padding(.leading, 15)
+                            .onTapGesture {
+                                print("DELETE", selectedModel?.name)
+                            }
 
                         }
+                        .padding(.bottom, 80)
+
                     }
-                    Spacer()
+//                    Spacer()
 
                 }
             }
             .navigationDestination(for: SampleModel.self) { selectedImage in
-                SelectedImage(image: selectedImage) // Pass Image
+                SelectedImage(image: selectedImage)
             }
         }
     }
