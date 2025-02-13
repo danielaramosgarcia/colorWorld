@@ -8,12 +8,14 @@
 import SwiftUI
 
 struct SelectedImage: View {
-    var image: SampleModel? // Received Image
+    var image: Data
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @State private var nameInput: String = ""
 
     var body: some View {
+        let newUiImage = UIImage(data: image)
+
         ZStack {
             Gradiant()
                 .ignoresSafeArea()
@@ -34,9 +36,10 @@ struct SelectedImage: View {
                     .frame(width: 400)
                     .padding(.bottom, -30)
                     .font(.system(size: 25))
+                    .bold()
 
-                if image != nil && image?.img != nil {
-                    Image(uiImage: (image?.img == nil ? Constants.placeholder : image?.img)!)
+                if newUiImage != nil {
+                    Image(uiImage: newUiImage!)
                         .resizable()
                         .clipShape(RoundedRectangle(cornerRadius: 20))
                         .scaledToFit()
@@ -47,22 +50,38 @@ struct SelectedImage: View {
                                 .stroke(Color.white, lineWidth: 10)
                                 .padding(76)
                         )
+                    HStack {
+                        Image(systemName: "paintbrush.fill")
+                            .font(.title)
+                            .foregroundColor(.black)
+                        Text("Transform")
+                            .font(.title)
+                            .foregroundStyle(
+                                LinearGradient(gradient: Gradient(colors:
+                        [.red, .blue, .green]), startPoint: .leading, endPoint: .trailing)
+                            )
+                    }
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(30)
+                    .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
+                    .padding(.top, -30)
+
                 } else {
                     Text("No image selected")
                         .font(.title)
                         .foregroundColor(.gray)
                 }
             }
-//            .textFieldStyle(.roundedBorder)
-
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    modelContext.insert(image!)
+                    let newSample: SampleModel = SampleModel(id: UUID(), name: nameInput, data: image)
+                    modelContext.insert(newSample)
                         dismiss()
                 } label: {
-                    Text( "Add")
+                    Text( "Let's paint")
                 }
 //                .disabled(view.isDisabled)
             }
@@ -72,9 +91,7 @@ struct SelectedImage: View {
 }
 
 #Preview {
-
-    @Previewable @State var viewModel: UpdateEditFormViewModel = UpdateEditFormViewModel()
     let peoniesImage = UIImage(named: "peonies")
-    let peoniesData = peoniesImage?.jpegData(compressionQuality: 1.0)
-    SelectedImage(image: SampleModel(id: UUID(), name: "hi", data: peoniesData))
+    let peoniesData = peoniesImage!.jpegData(compressionQuality: 1.0)
+    SelectedImage(image: peoniesData!)
 }
