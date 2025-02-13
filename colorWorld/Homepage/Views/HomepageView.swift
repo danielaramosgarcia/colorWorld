@@ -10,12 +10,14 @@ import _SwiftData_SwiftUI
 import PhotosUI
 
 struct HomepageView: View {
+    @Environment(\.modelContext) private var modelContext
     @State private var selectedCard: Int?
     @State private var selectedCardModel: SampleModel?
     @State var viewModel: UpdateEditFormViewModel = UpdateEditFormViewModel()
     @State private var imagePicker = ImagePicker()
-    @State private var path: [SampleModel] = []
+    @State private var path: [Data] = []
     @State private var selectedModel: SampleModel?
+    @State private var selectedData: Data = Data()
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -55,7 +57,7 @@ struct HomepageView: View {
                         }
                     }                            .padding(.horizontal, 60)
                     Spacer()
-                    Deck(selectedCard: $selectedCard, selectedModel: $selectedModel)
+                    LoopingStack(selectedCard: $selectedCard, selectedModel: $selectedModel)
                     Spacer()
                     if selectedCard == nil {
 
@@ -77,7 +79,7 @@ struct HomepageView: View {
                                 .cornerRadius(30)
                                 .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
                             }
-                            NavigationLink(destination: SelectedImage()) {
+                            NavigationLink(destination: SelectedImage(image: selectedData)) {
                                 HStack {
                                     Image(systemName: "photo")
                                         .font(.title)
@@ -104,12 +106,9 @@ struct HomepageView: View {
                                         if let newSelection {
                                             do {
                                                 try await imagePicker.loadTransferable(from: newSelection)
-                                                if viewModel.image != Constants.placeholder && viewModel.image != nil {
-                                                    let newSample = SampleModel(id: UUID(), name: "Name")
-                                                    newSample.data = viewModel.image.jpegData(compressionQuality: 0.8)
-                                                    path.append(newSample)
 
-                                                }
+                                                selectedData = viewModel.image.jpegData(compressionQuality: 0.8)!
+                                                    path.append(selectedData)
 
                                             } catch {
                                                 print("Error loading image: \(error.localizedDescription)")
@@ -122,18 +121,18 @@ struct HomepageView: View {
                         .onAppear {
                             imagePicker.setup(viewModel)
                         }
-                        .padding(.bottom, 80)
+                        .padding(.bottom, 100)
                     } else {
                         HStack {
                                 HStack {
-                                    Image(systemName: "paintbrush.fill")
+                                    Image(systemName: "pencil.tip.crop.circle.fill")
                                         .font(.title)
                                         .foregroundColor(.black)
                                     Text("Edit")
                                         .font(.title)
                                         .foregroundStyle(
                                             LinearGradient(gradient: Gradient(colors:
-                                                        [.red, .blue, .green]), startPoint: .leading, endPoint: .trailing)
+                                    [.red, .blue, .green]), startPoint: .leading, endPoint: .trailing)
                                         )
                                 }
                                 .padding()
@@ -158,18 +157,20 @@ struct HomepageView: View {
                             .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
                             .padding(.leading, 15)
                             .onTapGesture {
-                                print("DELETE", selectedModel?.name)
+                                modelContext.delete(selectedModel!)
+                                try? modelContext.save()
+                                selectedCard = nil
                             }
 
                         }
-                        .padding(.bottom, 80)
+                        .padding(.bottom, 100)
 
                     }
 //                    Spacer()
 
                 }
             }
-            .navigationDestination(for: SampleModel.self) { selectedImage in
+            .navigationDestination(for: Data.self) { selectedImage in
                 SelectedImage(image: selectedImage)
             }
         }

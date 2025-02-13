@@ -18,7 +18,7 @@ class UpdateEditFormViewModel {
         if let data, let uiImage = UIImage(data: data) {
             return uiImage
         } else {
-            return Constants.placeholder!
+            return UIImage(imageLiteralResourceName: "noCards")
         }
     }
 
