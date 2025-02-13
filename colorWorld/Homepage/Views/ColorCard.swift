@@ -22,13 +22,12 @@ struct ColorCard: View {
                 Text(card.name)
                     .padding(3)
                     .padding(.horizontal, 6)
-                    .bold()
                     .background(
                                     RoundedRectangle(cornerRadius: 5)
                                         .fill(Color.white)
                                         .shadow(color: .black.opacity(0.6), radius: 2, x: 2, y: 3)
                                 )
-                    .foregroundStyle(Color(.blue))
+                    .foregroundStyle(Color(.black))
                     .padding(.top, 25)
                 Spacer()
             }

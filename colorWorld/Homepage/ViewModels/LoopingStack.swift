@@ -1,86 +1,132 @@
+//
+//  LoppingStack.swift
+//  colorWorld
+//
+//  Created by Daniela Ramos Garcia on 29/12/24.
+//
+
 import SwiftUI
+import _SwiftData_SwiftUI
 
-struct LoopingStack<Content: View>: View {
-    var maxTranslationWidth: CGFloat?
+// Enum para identificar la dirección del swipe
+enum SwipeDirection {
+    case left, right
+}
+
+struct LoopingStack: View {
+    // Consulta directa de modelos, sin pasar parámetros innecesarios.
+    @Query(sort: \SampleModel.name) var samples: [SampleModel]
+    var maxTranslationWidth: CGFloat? = 200
     var visibleCardsCount: Int = 5
+
     @Binding var selectedCard: Int?
-    @ViewBuilder var content: Content
+    @Binding var selectedModel: SampleModel?
+
+    // Estado para controlar la rotación (para animación)
     @State private var rotation: Int = 0
+
     var body: some View {
-        Group(subviews: content) { collection in
-            let collection = collection.rotateFromLeft(by: rotation)
-            let count = collection.count
+        let count = samples.count
+        // Se obtiene el arreglo rotado; la función 'rotated(by:)' devuelve una copia sin alterar el arreglo original.
+        let displaySamples = samples.rotated(by: rotation)
 
-            ZStack {
+        ZStack {
+            ForEach(Array(displaySamples.prefix(visibleCardsCount).enumerated()), id: \.element.id) { index, sample in
+                let zIndex = Double(count - index)
 
-                ForEach(collection.prefix(visibleCardsCount)) { view in
-                    let index = collection.index(view)
-                    let zIndex = Double(count - index)
+                LoopingStackCardView(
+                    model: sample,
+                    index: index,
+                    count: count,
+                    visibleCardsCount: visibleCardsCount,
+                    maxTranslationWidth: maxTranslationWidth,
+                    rotation: $rotation,
+                    selectedCard: $selectedCard,
+                    selectedModel: $selectedModel
 
-                    LoopingStackCardView(
-                        index: index,
-                        count: count,
-                        visibleCardsCount: visibleCardsCount,
-                        maxTranslationWidth: maxTranslationWidth,
-                        rotation: $rotation,
-                        selectedCard: $selectedCard
-                    ) {
-                        view
-                    }
-                    .zIndex(selectedCard == index ? 100 : zIndex) // Trae la carta seleccionada al frente
-                    .opacity(selectedCard == nil || selectedCard == index ? 1 : 0) // Hide unselected cards
-                    .animation(.easeInOut(duration: 0.4), value: selectedCard)
+                ) {
+                    // Se instancia directamente ColorCard
+                    ColorCard(card: sample, selectedCard: $selectedCard, selectedModel: $selectedModel)
                 }
+                .zIndex(selectedCard == index ? 100 : zIndex) // La carta seleccionada queda en frente
+                .opacity(selectedCard == nil || selectedCard == index ? 1 : 0)
+                .animation(.easeInOut(duration: 0.4), value: selectedCard)
             }
         }
     }
 }
 
-// Vista individual para cada carta
+// Vista individual para cada carta del deck.
 private struct LoopingStackCardView<Content: View>: View {
+    var model: SampleModel
+
     var index: Int
     var count: Int
     var visibleCardsCount: Int
     var maxTranslationWidth: CGFloat?
+
     @Binding var rotation: Int
-    @Binding var selectedCard: Int? // Estado para manejar la carta seleccionada
+    @Binding var selectedCard: Int?
+    @Binding var selectedModel: SampleModel?
+
     @ViewBuilder var content: Content
+
     @State private var offset: CGFloat = .zero
     @State private var viewSize: CGSize = .zero
 
     var body: some View {
+
         let maxRotation: CGFloat = 20
         let maxSpacing: CGFloat = 50
         let baseRotation = -maxRotation / 2
         let cardRotation = baseRotation + (maxRotation / CGFloat(visibleCardsCount - 1)) * CGFloat(index)
         let horizontalOffset = -maxSpacing + (maxSpacing * 2 / CGFloat(visibleCardsCount - 1)) * CGFloat(index)
 
-        let rotationValue = max(min(-offset / viewSize.width, 1), 0) * -30
+        // Calcula el ángulo de rotación 3D de forma simétrica según la dirección del swipe.
+        let rotationValue: CGFloat = {
+            if offset < 0 {
+                return max(min(-offset / viewSize.width, 1), 0) * -30
+            } else {
+                return min(offset / viewSize.width, 1) * 30
+            }
+        }()
 
         content
             .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { viewSize = $0 })
-            .rotationEffect(.degrees(selectedCard == index ? 0 : cardRotation)) // Se centra en caso de selección
-            .offset(x: selectedCard == index ? 0 : horizontalOffset, y: selectedCard == index ? 0 : CGFloat(index) * -5)
+            .rotationEffect(.degrees(selectedCard == index ? 0 : cardRotation))
+            .offset(
+                x: selectedCard == index ? 0 : horizontalOffset,
+                y: selectedCard == index ? 0 : CGFloat(index) * -5
+            )
             .offset(x: offset)
             .animation(.smooth(duration: 0.25, extraBounce: 0), value: index)
-            .rotation3DEffect(.init(degrees: selectedCard == index ? 0 : rotationValue), axis: (0, 1, 0), anchor: .center, perspective: 0.5)
-            .scaleEffect(selectedCard == index ? 1.6 : 1) // Aumenta tamaño si está seleccionada
+            .rotation3DEffect(
+                .init(degrees: selectedCard == index ? 0 : rotationValue),
+                axis: (0, 1, 0),
+                anchor: .center,
+                perspective: 0.5
+            )
+            .scaleEffect(selectedCard == index ? 1.6 : 1)
             .shadow(radius: selectedCard == index ? 10 : 5)
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        let xOffset = -max(-value.translation.width, 0)
-                        if let maxTranslationWidth {
-                            let progress = -max(min(-xOffset / maxTranslationWidth, 1), 0) * viewSize.width
-                            offset = progress
-                        } else {
-                            offset = xOffset
-                        }
+                        // Actualiza el offset según el arrastre.
+                        offset = value.translation.width
                     }
                     .onEnded { value in
-                        let xVelocity = max(-value.velocity.width / 5, 0)
-                        if (-offset + xVelocity) > (viewSize.width * 0.65) {
-                            pushToNextCard()
+                        // Umbral para considerar el swipe.
+                        let threshold = viewSize.width * 0.65
+                        if offset < 0 {
+                            let xVelocity = max(-value.velocity.width / 5, 0)
+                            if (-offset + xVelocity) > threshold {
+                                pushToNextCard(direction: .left)
+                            }
+                        } else if offset > 0 {
+                            let xVelocity = max(value.velocity.width / 5, 0)
+                            if (offset + xVelocity) > threshold {
+                                pushToNextCard(direction: .right)
+                            }
                         }
                         withAnimation(.smooth(duration: 0.3, extraBounce: 0)) {
                             offset = .zero
@@ -90,16 +136,26 @@ private struct LoopingStackCardView<Content: View>: View {
             )
             .onTapGesture {
                 withAnimation(.spring()) {
-                    selectedCard = selectedCard == index ? nil : index // Alterna selección
+                    if selectedCard == index {
+                        // Deselecciona la carta
+                        selectedCard = nil
+                        selectedModel = nil
+                    } else {
+                        // Selecciona la carta y asigna su modelo
+                        selectedCard = index
+                        selectedModel = model
+                    }
                 }
             }
-
     }
 
-    private func pushToNextCard() {
+    /// Anima la carta fuera de la pantalla y actualiza la rotación para mover la carta al fondo.
+    private func pushToNextCard(direction: SwipeDirection) {
+        let targetOffset: CGFloat = direction == .left ? -viewSize.width : viewSize.width
         withAnimation(.smooth(duration: 0.25, extraBounce: 0).logicallyComplete(after: 0.05), completionCriteria: .logicallyComplete) {
-            offset = -viewSize.width
+            offset = targetOffset
         } completion: {
+            // Independientemente de la dirección, se incrementa la rotación para mover la carta superior al fondo.
             rotation += 1
             withAnimation(.smooth(duration: 0.25, extraBounce: 0)) {
                 offset = .zero
@@ -108,25 +164,20 @@ private struct LoopingStackCardView<Content: View>: View {
     }
 }
 
-extension SubviewsCollection {
-    func rotateFromLeft(by: Int) -> [SubviewsCollection.Element] {
-        guard !isEmpty else { return [] }
-        let moveIndex = by % (count == 0 ? 1 : count)
-        let rotatedElements = Array(self[moveIndex...]) + Array(self[0..<moveIndex])
-        return rotatedElements
-    }
-}
-
-extension [SubviewsCollection.Element] {
-    func index(_ item: SubviewsCollection.Element) -> Int {
-        firstIndex(where: { $0.id == item.id }) ?? 0
+// Extensión para rotar arreglos sin modificar el arreglo original.
+extension Array {
+    func rotated(by shift: Int) -> [Element] {
+        guard !isEmpty else { return self }
+        // Se asegura que el shift quede en el rango [0, count)
+        let modShift = ((shift % count) + count) % count
+        return Array(self[modShift..<count] + self[0..<modShift])
     }
 }
 
 #Preview {
-    @State var previewSelectedCard: Int? // Estado de prueba para la selección
-    @State var previewSelectedModel: SampleModel? // Estado de prueba para la selección
+    @State var previewSelectedCard: Int?
+    @State var previewSelectedModel: SampleModel?
 
-    Deck(selectedCard: $previewSelectedCard, selectedModel: $previewSelectedModel)
-    .modelContainer(SampleModel.preview)
+    LoopingStack(selectedCard: $previewSelectedCard, selectedModel: $previewSelectedModel)
+        .modelContainer(SampleModel.preview)
 }

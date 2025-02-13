@@ -10,6 +10,7 @@ import _SwiftData_SwiftUI
 import PhotosUI
 
 struct HomepageView: View {
+    @Environment(\.modelContext) private var modelContext
     @State private var selectedCard: Int?
     @State private var selectedCardModel: SampleModel?
     @State var viewModel: UpdateEditFormViewModel = UpdateEditFormViewModel()
@@ -55,7 +56,7 @@ struct HomepageView: View {
                         }
                     }                            .padding(.horizontal, 60)
                     Spacer()
-                    Deck(selectedCard: $selectedCard, selectedModel: $selectedModel)
+                    LoopingStack(selectedCard: $selectedCard, selectedModel: $selectedModel)
                     Spacer()
                     if selectedCard == nil {
 
@@ -122,7 +123,7 @@ struct HomepageView: View {
                         .onAppear {
                             imagePicker.setup(viewModel)
                         }
-                        .padding(.bottom, 80)
+                        .padding(.bottom, 100)
                     } else {
                         HStack {
                                 HStack {
@@ -133,7 +134,7 @@ struct HomepageView: View {
                                         .font(.title)
                                         .foregroundStyle(
                                             LinearGradient(gradient: Gradient(colors:
-                                                        [.red, .blue, .green]), startPoint: .leading, endPoint: .trailing)
+                                    [.red, .blue, .green]), startPoint: .leading, endPoint: .trailing)
                                         )
                                 }
                                 .padding()
@@ -158,11 +159,13 @@ struct HomepageView: View {
                             .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
                             .padding(.leading, 15)
                             .onTapGesture {
-                                print("DELETE", selectedModel?.name)
+                                modelContext.delete(selectedModel!)
+                                try? modelContext.save()
+                                selectedCard = nil
                             }
 
                         }
-                        .padding(.bottom, 80)
+                        .padding(.bottom, 100)
 
                     }
 //                    Spacer()
