@@ -14,20 +14,28 @@ struct ColorCard: View {
     @Binding var selectedModel: SampleModel?
     var body: some View {
         ZStack {
-            Image(uiImage: (card.img == nil ? Constants.placeholder : card.img)!)
-                .resizable()
-                .scaledToFit()
-                .padding()
+            if card.img != nil {
+                Image(uiImage: card.img!)
+                    .resizable()
+                    .scaledToFit()
+                    .padding()
+            } else {
+                Image("noCards")
+                    .resizable()
+                    .scaledToFit()
+                    .padding()
+            }
             VStack {
                 Text(card.name)
                     .padding(3)
                     .padding(.horizontal, 6)
+                    .bold()
                     .background(
                                     RoundedRectangle(cornerRadius: 5)
                                         .fill(Color.white)
                                         .shadow(color: .black.opacity(0.6), radius: 2, x: 2, y: 3)
                                 )
-                    .foregroundStyle(Color(.black))
+                    .foregroundStyle(Color(.gray))
                     .padding(.top, 25)
                 Spacer()
             }

@@ -31,12 +31,36 @@ struct LoopingStack: View {
         let displaySamples = samples.rotated(by: rotation)
 
         ZStack {
-            ForEach(Array(displaySamples.prefix(visibleCardsCount).enumerated()), id: \.element.id) { index, sample in
-                let zIndex = Double(count - index)
+            if count > 0 {
+                ForEach(Array(displaySamples.prefix(visibleCardsCount).enumerated()), id: \.element.id) { index, sample in
+                    let zIndex = Double(count - index)
+
+                    LoopingStackCardView(
+                        model: sample,
+                        index: index,
+                        count: count,
+                        visibleCardsCount: visibleCardsCount,
+                        maxTranslationWidth: maxTranslationWidth,
+                        rotation: $rotation,
+                        selectedCard: $selectedCard,
+                        selectedModel: $selectedModel
+
+                    ) {
+                        // Se instancia directamente ColorCard
+                        ColorCard(card: sample, selectedCard: $selectedCard, selectedModel: $selectedModel)
+                    }
+                    .zIndex(selectedCard == index ? 100 : zIndex) // La carta seleccionada queda en frente
+                    .opacity(selectedCard == nil || selectedCard == index ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.4), value: selectedCard)
+                }
+            } else {
+                let noCardsImage = UIImage(named: "noCards")
+                let noCardsData = noCardsImage!.jpegData(compressionQuality: 1.0)
+                let sample = SampleModel(id: UUID(), name: "No cards yet", data: noCardsData)
 
                 LoopingStackCardView(
                     model: sample,
-                    index: index,
+                    index: 0,
                     count: count,
                     visibleCardsCount: visibleCardsCount,
                     maxTranslationWidth: maxTranslationWidth,
@@ -48,9 +72,10 @@ struct LoopingStack: View {
                     // Se instancia directamente ColorCard
                     ColorCard(card: sample, selectedCard: $selectedCard, selectedModel: $selectedModel)
                 }
-                .zIndex(selectedCard == index ? 100 : zIndex) // La carta seleccionada queda en frente
-                .opacity(selectedCard == nil || selectedCard == index ? 1 : 0)
+                .zIndex(100) // La carta seleccionada queda en frente
+                .opacity(selectedCard == nil || selectedCard == 0 ? 1 : 0)
                 .animation(.easeInOut(duration: 0.4), value: selectedCard)
+
             }
         }
     }
