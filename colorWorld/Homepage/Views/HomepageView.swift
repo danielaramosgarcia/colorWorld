@@ -4,27 +4,22 @@
 //
 //  Created by Daniela Ramos Garcia on 29/12/24.
 //
-
 import SwiftUI
 import _SwiftData_SwiftUI
-import PhotosUI
 
 struct HomepageView: View {
-    @Environment(\.modelContext) private var modelContext
     @State private var selectedCard: Int?
     @State private var selectedCardModel: SampleModel?
-    @State var viewModel: UpdateEditFormViewModel = UpdateEditFormViewModel()
-    @State private var imagePicker = ImagePicker()
     @State private var path: [Data] = []
     @State private var selectedModel: SampleModel?
     @State private var selectedData: Data = Data()
+    @State private var selectedTab: Int = 0
 
     var body: some View {
         NavigationStack(path: $path) {
             ZStack {
                 Gradiant()
                     .ignoresSafeArea()
-                    .background()
                 VStack {
                     HStack {
                         Text("ColorWorld")
@@ -45,129 +40,43 @@ struct HomepageView: View {
                             .padding(.top, 20)
 
                         Spacer()
+
                         if selectedCard == nil {
                             Button(action: {
                                 print("hola")
-                            }
-                            ) {
+                            }) {
                                 Image(systemName: "info.circle")
                                     .font(.title)
                                     .foregroundColor(.black)
                             }
                         }
-                    }                            .padding(.horizontal, 60)
-                    Spacer()
-                    LoopingStack(selectedCard: $selectedCard, selectedModel: $selectedModel)
-                    Spacer()
-                    if selectedCard == nil {
-
-                        HStack {
-                            NavigationLink(destination: CameraView()) {
-                                HStack {
-                                    Image(systemName: "camera.fill")
-                                        .font(.title)
-                                        .foregroundColor(.black)
-                                    Text("Add photo")
-                                        .font(.title)
-                                        .foregroundStyle(
-                                            LinearGradient(gradient: Gradient(colors:
-                                        [.red, .blue, .green]), startPoint: .leading, endPoint: .trailing)
-                                        )
-                                }
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(30)
-                                .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
-                            }
-                            NavigationLink(destination: SelectedImage(image: selectedData)) {
-                                HStack {
-                                    Image(systemName: "photo")
-                                        .font(.title)
-                                        .foregroundColor(.black)
-                                    Text("Select photo")
-                                        .font(.title)
-                                        .foregroundStyle(
-                                            LinearGradient(gradient: Gradient(colors:
-                                                [ .green, .blue, .red]), startPoint: .leading, endPoint: .trailing)
-                                        )
-                                }
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(30)
-                                .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
-                                .padding(.leading, 15)
-                                .overlay {
-                                    PhotosPicker(selection: $imagePicker.imageSelection) {
-                                        Color.clear
-                                    }
-                                }
-                                .onChange(of: imagePicker.imageSelection) { newSelection in
-                                    Task {
-                                        if let newSelection {
-                                            do {
-                                                try await imagePicker.loadTransferable(from: newSelection)
-
-                                                selectedData = viewModel.image.jpegData(compressionQuality: 0.8)!
-                                                    path.append(selectedData)
-
-                                            } catch {
-                                                print("Error loading image: \(error.localizedDescription)")
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        .onAppear {
-                            imagePicker.setup(viewModel)
-                        }
-                        .padding(.bottom, 100)
-                    } else {
-                        HStack {
-                                HStack {
-                                    Image(systemName: "pencil.tip.crop.circle.fill")
-                                        .font(.title)
-                                        .foregroundColor(.black)
-                                    Text("Edit")
-                                        .font(.title)
-                                        .foregroundStyle(
-                                            LinearGradient(gradient: Gradient(colors:
-                                    [.red, .blue, .green]), startPoint: .leading, endPoint: .trailing)
-                                        )
-                                }
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(30)
-                                .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
-
-                            HStack {
-                                Image(systemName: "trash.fill")
-                                    .font(.title)
-                                    .foregroundColor(.black)
-                                Text("Delete")
-                                    .font(.title)
-                                    .foregroundStyle(
-                                        LinearGradient(gradient: Gradient(colors:
-                                                [ .green, .blue, .red]), startPoint: .leading, endPoint: .trailing)
-                                    )
-                            }
-                            .padding()
-                            .background(Color.white)
-                            .cornerRadius(30)
-                            .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
-                            .padding(.leading, 15)
-                            .onTapGesture {
-                                modelContext.delete(selectedModel!)
-                                try? modelContext.save()
-                                selectedCard = nil
-                            }
-
-                        }
-                        .padding(.bottom, 100)
-
                     }
-//                    Spacer()
+                    .padding(.horizontal, 60)
+                    .padding(.top, 60)
+                    Spacer()
 
+                    HStack(spacing: 15) {
+                        tabButton(title: "Recents", image: "clock", tag: 0)
+                        tabButton(title: "Gallery", image: "photo", tag: 1)
+                        tabButton(title: "Details", image: "info.circle", tag: 2)
+                    }
+                    .padding(.top, 20)
+
+                    TabView(selection: $selectedTab) {
+                        LoopingStack(selectedCard: $selectedCard, selectedModel: $selectedModel)
+                            .tag(0)
+                        GalleryView(selectedCard: $selectedCard, selectedModel: $selectedModel)
+                            .tag(1)
+                        ListView(selectedCard: $selectedCard, selectedModel: $selectedModel)
+                            .tag(2)
+                    }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                    .frame(height: 700)
+                    Spacer()
+                    Buttons(selectedCard: $selectedCard,
+                            selectedData: $selectedData,
+                            path: $path,
+                            selectedModel: $selectedModel)
                 }
             }
             .navigationDestination(for: Data.self) { selectedImage in
@@ -176,9 +85,28 @@ struct HomepageView: View {
         }
     }
 
+    private func tabButton(title: String, image: String, tag: Int) -> some View {
+        Button(action: { selectedTab = tag }) {
+            HStack(spacing: 8) {
+                Text(title)
+                    .font(.system(size: 20, weight: .semibold))
+                Image(systemName: image)
+                    .font(.system(size: 24))
+            }
+            .padding(.vertical, 10)
+            .padding(.horizontal, 20)
+            .foregroundColor(selectedTab == tag ? .blue : .white)
+            .background(
+                selectedTab == tag ?
+                Color.white.opacity(0.3) :
+                Color.clear
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
+        }
     }
+}
 
 #Preview {
-    HomepageView(viewModel: UpdateEditFormViewModel())
+    HomepageView()
         .modelContainer(SampleModel.preview)
 }
