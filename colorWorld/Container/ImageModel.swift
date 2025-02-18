@@ -42,8 +42,13 @@ extension SampleModel {
                 .init(id: UUID(), name: "Boobie goods", data: noCardsData),
                 .init(id: UUID(), name: "Peonias", data: peoniesData), // Asignamos data
                 .init(id: UUID(), name: "Flowers", data: peoniesData),
-                .init(id: UUID(), name: "Boobie", data: noCardsData)
-
+                .init(id: UUID(), name: "Boobie", data: noCardsData),
+                .init(id: UUID(), name: "Boobie goods", data: noCardsData),
+                .init(id: UUID(), name: "Peonias", data: peoniesData), // Asignamos data
+                .init(id: UUID(), name: "Flowers", data: peoniesData),
+                .init(id: UUID(), name: "Boobie", data: noCardsData),
+                .init(id: UUID(), name: "Peonias", data: peoniesData), // Asignamos data
+                .init(id: UUID(), name: "Flowers", data: peoniesData)
             ]
             samples.forEach {
                 container.mainContext.insert($0)
