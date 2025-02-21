@@ -10,31 +10,30 @@ import CoreML
 import Vision
 
 struct SelectedImage: View {
-    var image: Data
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
+    var imageData: Data
     @State private var nameInput: String = ""
-    @State private var styledImage: UIImage? // Transformed image
-    @State private var showNameError: Bool = false  // Controls error display
-
+    @State private var styledImage: UIImage?
+    @State private var showNameError: Bool = false
+    @State private var isLoading: Bool = false
+    @Binding var path: [Data]
+    @State private var navigateToPaint: Bool = false
+    
+    
     var body: some View {
-        // The original image from the data.
-        let originalUIImage = UIImage(data: image)
+        let originalUIImage = UIImage(data: imageData)
 
         ZStack {
             Gradiant()
                 .ignoresSafeArea()
-                .background()
             VStack {
                 VStack(spacing: 5) {
-                    // Error message shown on top if name is missing.
                     if showNameError {
-                        Text("The name is necessary, every art piece needs one")
-                            .font(.headline) // Bigger font
+                        Text("The name is necessary for any art piece")
+                            .font(.headline)
                             .foregroundColor(.white)
                     }
 
-                    TextField("Give your art a name", text: $nameInput)
+                    TextField("Name you art", text: $nameInput)
                         .textInputAutocapitalization(.sentences)
                         .multilineTextAlignment(.center)
                         .disableAutocorrection(true)
@@ -51,7 +50,13 @@ struct SelectedImage: View {
                 }
                 .padding(.bottom, -30)
 
-                // Display the transformed image if available; otherwise, show the original.
+                // Si se está aplicando la transformación, muestra un loading
+                if isLoading {
+                    ProgressView("Applying style, give me a sec...")
+                        .padding()
+                }
+
+                // Se muestra la imagen transformada si existe, de lo contrario la original
                 if let displayImage = styledImage ?? originalUIImage {
                     Image(uiImage: displayImage)
                         .resizable()
@@ -70,12 +75,12 @@ struct SelectedImage: View {
                         .foregroundColor(.gray)
                 }
 
-                // Transform / Undo button
+                // Botón para transformar o deshacer la transformación
                 HStack {
                     Image(systemName: styledImage == nil ? "paintbrush.fill" : "arrow.uturn.backward")
                         .font(.title)
                         .foregroundColor(.black)
-                    Text(styledImage == nil ? "Transform" : "Undo")
+                    Text(styledImage == nil ? "Transfor" : "Undo")
                         .font(.title)
                         .foregroundStyle(
                             LinearGradient(
@@ -91,98 +96,98 @@ struct SelectedImage: View {
                 .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
                 .padding(.top, -30)
                 .onTapGesture {
-                    // Toggle style transformation
                     if styledImage != nil {
+                        // Permite volver a la imagen original
                         styledImage = nil
                     } else if let original = originalUIImage {
                         applyStyleTransfer(to: original)
                     }
                 }
             }
+
+            // NavigationLink oculto para pasar a Paint
+            NavigationLink(
+                destination: Paint(
+                    imageData: (styledImage != nil
+                                ? styledImage!.jpegData(compressionQuality: 1.0)!
+                                : imageData),
+                    name: nameInput,
+                    path: $path
+                ),
+                isActive: $navigateToPaint
+            ) {
+                EmptyView()
+            }
+            .hidden()
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    // Validate that the name is not empty.
+                    // Validación del nombre
                     if nameInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        withAnimation {
-                            showNameError = true
-                        }
+                        withAnimation { showNameError = true }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                            withAnimation {
-                                showNameError = false
-                            }
+                            withAnimation { showNameError = false }
                         }
                         return
                     }
 
-                    // Save the displayed image (transformed or original)
-                    let imageToSave: Data
-                    if let styled = styledImage, let styledData = styled.jpegData(compressionQuality: 1.0) {
-                        imageToSave = styledData
-                    } else {
-                        imageToSave = image
-                    }
+                    // Si se está transformando, no permitimos navegar
+                    if isLoading { return }
 
-                    let newSample = SampleModel(id: UUID(), name: nameInput, data: imageToSave)
-                    modelContext.insert(newSample)
-                    dismiss()
+                    navigateToPaint = true
                 } label: {
                     Text("Let's paint")
                 }
+                // Se deshabilita el botón mientras esté cargando
+                .disabled(isLoading)
             }
         }
     }
 
-    /// Applies the style transfer model to the input image.
+    /// Aplica la transferencia de estilo al inputImage de forma asíncrona.
     func applyStyleTransfer(to inputImage: UIImage) {
-        // Run on background to avoid blocking the UI.
         DispatchQueue.global(qos: .userInitiated).async {
-            // Initialize the model.
-            guard let model = try? good_two(configuration: MLModelConfiguration()) else {
-                print("Error loading style transfer model")
-                return
+            // Indicar que se inicia la transformación
+            DispatchQueue.main.async {
+                isLoading = true
             }
 
-            // The model expects images of 512x512.
+            guard let model = try? good(configuration: MLModelConfiguration()) else {
+                print("Error loading the style model")
+                DispatchQueue.main.async { isLoading = false }
+                return
+            }
             let targetSize = CGSize(width: 512, height: 512)
-            // Resize the input image and convert it to a CVPixelBuffer in BGRA format.
             guard let resizedImage = inputImage.resized(to: targetSize),
                   let pixelBuffer = resizedImage.toCVPixelBuffer(width: Int(targetSize.width), height: Int(targetSize.height)) else {
-                print("Error converting image to pixel buffer")
+                print("Error al convertir la imagen a pixel buffer")
+                DispatchQueue.main.async { isLoading = false }
                 return
             }
-
-            // Execute the prediction.
             guard let output = try? model.prediction(image: pixelBuffer) else {
-                print("Error during style transfer prediction")
+                print("Error durante la predicción de estilo")
+                DispatchQueue.main.async { isLoading = false }
                 return
             }
-
-            // Convert the output (CVPixelBuffer) to a UIImage.
             guard let outputUIImage = UIImage(pixelBuffer: output.stylizedImage) else {
-                print("Error converting model output to UIImage")
+                print("Error al convertir la salida del modelo a UIImage")
+                DispatchQueue.main.async { isLoading = false }
                 return
             }
-
-            // Resize the output image to the original image size to avoid distortion.
             let originalSize = inputImage.size
             guard let finalImage = outputUIImage.resized(to: originalSize) else {
-                print("Error resizing the output image to original size")
+                print("Error al redimensionar la imagen de salida")
+                DispatchQueue.main.async { isLoading = false }
                 return
             }
-
-            // Update the UI on the main thread.
             DispatchQueue.main.async {
-                self.styledImage = finalImage
+                styledImage = finalImage
+                isLoading = false
             }
         }
     }
 }
-
-//
-// MARK: - Extensions for converting UIImage to CVPixelBuffer and vice versa
-//
 
 extension UIImage {
     /// Resize the image to a specified size.
@@ -201,7 +206,6 @@ extension UIImage {
             kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue!,
             kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue!
         ] as CFDictionary
-
         let status = CVPixelBufferCreate(kCFAllocatorDefault,
                                          width,
                                          height,
@@ -211,7 +215,6 @@ extension UIImage {
         guard status == kCVReturnSuccess, let buffer = pixelBuffer else {
             return nil
         }
-
         CVPixelBufferLockBaseAddress(buffer, [])
         guard let pixelData = CVPixelBufferGetBaseAddress(buffer) else {
             CVPixelBufferUnlockBaseAddress(buffer, [])
@@ -253,7 +256,8 @@ extension UIImage {
 }
 
 #Preview {
-    let peoniesImage = UIImage(named: "yo")
+    let peoniesImage = UIImage(named: "balon")
     let peoniesData = peoniesImage!.jpegData(compressionQuality: 1.0)
-    SelectedImage(image: peoniesData!)
+    @State var path: [Data] = []
+    SelectedImage(imageData: peoniesData!, path: $path)
 }

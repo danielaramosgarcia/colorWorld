@@ -80,7 +80,7 @@ struct HomepageView: View {
                 }
             }
             .navigationDestination(for: Data.self) { selectedImage in
-                SelectedImage(image: selectedImage)
+                SelectedImage(imageData: selectedImage, path: $path)
             }
         }
     }

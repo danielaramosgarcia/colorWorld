@@ -14,6 +14,7 @@ class UpdateEditFormViewModel {
     var name: String = ""
     var data: Data?
     var sample: SampleModel?
+    var cameraImage: UIImage?
     var image: UIImage {
         if let data, let uiImage = UIImage(data: data) {
             return uiImage
