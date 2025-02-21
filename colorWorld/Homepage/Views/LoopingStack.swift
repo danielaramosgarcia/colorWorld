@@ -8,26 +8,22 @@
 import SwiftUI
 import _SwiftData_SwiftUI
 
-// Enum para identificar la dirección del swipe
 enum SwipeDirection {
     case left, right
 }
 
 struct LoopingStack: View {
-    // Consulta directa de modelos, sin pasar parámetros innecesarios.
     @Query(sort: \SampleModel.date, order: .reverse) var samples: [SampleModel]
     var maxTranslationWidth: CGFloat? = 200
-    var visibleCardsCount: Int = 5
+    var visibleCardsCount: Int = 3
 
     @Binding var selectedCard: Int?
     @Binding var selectedModel: SampleModel?
 
-    // Estado para controlar la rotación (para animación)
     @State private var rotation: Int = 0
 
     var body: some View {
         let count = samples.count
-        // Se obtiene el arreglo rotado; la función 'rotated(by:)' devuelve una copia sin alterar el arreglo original.
         let displaySamples = samples.rotated(by: rotation)
 
         ZStack {
@@ -62,7 +58,6 @@ struct LoopingStack: View {
     }
 }
 
-// Vista individual para cada carta del deck.
 private struct LoopingStackCardView<Content: View>: View {
     var model: SampleModel
 
@@ -82,8 +77,8 @@ private struct LoopingStackCardView<Content: View>: View {
 
     var body: some View {
 
-        let maxRotation: CGFloat = 20
-        let maxSpacing: CGFloat = 50
+        let maxRotation: CGFloat = 30
+        let maxSpacing: CGFloat = 80
         let baseRotation = -maxRotation / 2
         let cardRotation = baseRotation + (maxRotation / CGFloat(visibleCardsCount - 1)) * CGFloat(index)
         let horizontalOffset = -maxSpacing + (maxSpacing * 2 / CGFloat(visibleCardsCount - 1)) * CGFloat(index)
@@ -161,7 +156,6 @@ private struct LoopingStackCardView<Content: View>: View {
         withAnimation(.smooth(duration: 0.25, extraBounce: 0).logicallyComplete(after: 0.05), completionCriteria: .logicallyComplete) {
             offset = targetOffset
         } completion: {
-            // Independientemente de la dirección, se incrementa la rotación para mover la carta superior al fondo.
             rotation += 1
             withAnimation(.smooth(duration: 0.25, extraBounce: 0)) {
                 offset = .zero
@@ -170,11 +164,9 @@ private struct LoopingStackCardView<Content: View>: View {
     }
 }
 
-// Extensión para rotar arreglos sin modificar el arreglo original.
 extension Array {
     func rotated(by shift: Int) -> [Element] {
         guard !isEmpty else { return self }
-        // Se asegura que el shift quede en el rango [0, count)
         let modShift = ((shift % count) + count) % count
         return Array(self[modShift..<count] + self[0..<modShift])
     }

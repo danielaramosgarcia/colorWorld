@@ -49,13 +49,11 @@ struct SelectedImage: View {
                 }
                 .padding(.bottom, -30)
 
-                // Si se está aplicando la transformación, muestra un loading
                 if isLoading {
                     ProgressView("Applying style, give me a sec...")
                         .padding()
                 }
 
-                // Se muestra la imagen transformada si existe, de lo contrario la original
                 if let displayImage = styledImage ?? originalUIImage {
                     Image(uiImage: displayImage)
                         .resizable()
@@ -74,12 +72,11 @@ struct SelectedImage: View {
                         .foregroundColor(.gray)
                 }
 
-                // Botón para transformar o deshacer la transformación
                 HStack {
                     Image(systemName: styledImage == nil ? "paintbrush.fill" : "arrow.uturn.backward")
                         .font(.title)
                         .foregroundColor(.black)
-                    Text(styledImage == nil ? "Transfor" : "Undo")
+                    Text(styledImage == nil ? "Transform" : "Undo")
                         .font(.title)
                         .foregroundStyle(
                             LinearGradient(
@@ -94,6 +91,7 @@ struct SelectedImage: View {
                 .cornerRadius(30)
                 .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
                 .padding(.top, -30)
+                .padding(.bottom, 20)
                 .onTapGesture {
                     if styledImage != nil {
                         // Permite volver a la imagen original
@@ -104,7 +102,6 @@ struct SelectedImage: View {
                 }
             }
 
-            // NavigationLink oculto para pasar a Paint
             NavigationLink(
                 destination: Paint(
                     viewModel: viewModel,
@@ -236,7 +233,6 @@ extension UIImage {
         return buffer
     }
 
-    /// Initialize a UIImage from a CVPixelBuffer.
     convenience init?(pixelBuffer: CVPixelBuffer) {
         CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
         let ciImage = CIImage(cvPixelBuffer: pixelBuffer)

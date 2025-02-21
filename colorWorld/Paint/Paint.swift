@@ -1,5 +1,5 @@
 //
-//  SwiftUIView.swift
+//  Paint.swift
 //  colorWorld
 //
 //  Created by Daniela Ramos Garcia on 15/02/25.
@@ -21,7 +21,7 @@ struct Paint: View {
         ZStack {
             Gradiant()
                 .ignoresSafeArea()
-            if let uiImage = UIImage(data: viewModel.data!) {
+            if let data = viewModel.data, let uiImage = UIImage(data: data) {
                 Image(uiImage: uiImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -29,7 +29,11 @@ struct Paint: View {
             CanvasView(canvas: $model.canvas, toolPicker: $model.toolPicker, rect: UIScreen.main.bounds.size)
         }
         .onAppear {
-            model.imageData = viewModel.data!
+            if let data = viewModel.data {
+                model.imageData = data
+            } else if let defaultData = UIImage(named: "noCards")?.jpegData(compressionQuality: 1.0) {
+                model.imageData = defaultData
+            }
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -41,13 +45,10 @@ struct Paint: View {
                         try? modelContext.save()
                         let newSample = SampleModel(id: UUID(), name: viewModel.name, data: model.imageData)
                         modelContext.insert(newSample)
-                        print("LLEGO A UPDATE")
                         navigateToHome = true
                     } else {
                         let newSample = SampleModel(id: UUID(), name: viewModel.name, data: model.imageData)
                         modelContext.insert(newSample)
-                        print("LLEGO A NEW SAMPLE")
-                        navigateToHome = true
                         path = []
                     }
                 } label: {
@@ -76,7 +77,6 @@ struct CanvasView: UIViewRepresentable {
         canvas.backgroundColor = .clear
         canvas.drawingPolicy = .anyInput
 
-        // Configuración del toolPicker
         toolPicker.setVisible(true, forFirstResponder: canvas)
         toolPicker.addObserver(canvas)
         canvas.becomeFirstResponder()
@@ -85,7 +85,6 @@ struct CanvasView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: PKCanvasView, context: Context) {
-        // Aquí podrías actualizar el canvas si es necesario
     }
 }
 

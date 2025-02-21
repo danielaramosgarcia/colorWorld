@@ -12,7 +12,7 @@ import SwiftData
 struct ColorWorldApp: App {
     var body: some Scene {
         WindowGroup {
-            HomepageView()
+            HomepageView(showIntro: true)
         }
         .modelContainer(SampleModel.preview)
 
