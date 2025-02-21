@@ -10,32 +10,54 @@ import SwiftUI
 struct ModalView: View {
     @Binding var showInfoModal: Bool
 
+    let facts = [
+        "CreateML and CoreML with a style transfer model to create drawings.",
+        "PencilKit for coloring and drawing on the canvas.",
+        "The Vision and PhotosUI frameworks to select photos from your gallery.",
+        "AVFoundation and UIKit for handling camera interactions."
+    ]
+
     var body: some View {
         VStack(spacing: 20) {
-            Text("Acerca de ColorWorld")
-                .font(.title)
+            Text("Some cool facts")
+                .font(.largeTitle)
                 .fontWeight(.bold)
-            Text("Esta app ofrece una experiencia única. Se recomienda usarla en iPad en posición vertical para una mejor experiencia.")
                 .multilineTextAlignment(.center)
-                .padding()
+            Text("You are using...")
+                .font(.title2)
+                .multilineTextAlignment(.center)
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(facts, id: \.self) { fact in
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(Color("rosa"))
+                            .padding(.top, 4)
+                        Text(fact)
+                            .font(.title3)
+                            .multilineTextAlignment(.leading)
+                    }
+                }
+            }
+            .padding(.horizontal)
             Button(action: {
                 showInfoModal = false
             }) {
-                Text("Cerrar")
+                Text("Close")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(.blue)
                     .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
+                    .frame(maxWidth: 200)
+                    .background(Color("celeste"))
                     .cornerRadius(10)
             }
-            .padding(.horizontal)
+            .padding(.top, 12)
         }
-        .padding()
+        .padding(.horizontal, 30)
     }
 }
 
 #Preview {
-    @State var showInfoModal: Bool = true
-    ModalView(showInfoModal: $showInfoModal)
+    HomepageView()
+        .modelContainer(SampleModel.preview)
 }

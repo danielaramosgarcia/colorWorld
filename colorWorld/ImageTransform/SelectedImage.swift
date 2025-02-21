@@ -116,7 +116,6 @@ struct SelectedImage: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    // Validación del nombre
                     if viewModel.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         withAnimation { showNameError = true }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {

@@ -50,6 +50,7 @@ struct Paint: View {
                         let newSample = SampleModel(id: UUID(), name: viewModel.name, data: model.imageData)
                         modelContext.insert(newSample)
                         path = []
+                        navigateToHome = true
                     }
                 } label: {
                     Text("Save Art")

@@ -28,7 +28,7 @@ struct HomepageView: View {
                     VStack {
                         HStack {
                             Text("ColorWorld")
-                                .font(.system(size: 60, weight: .bold))
+                                .font(.system(size: 60, weight: .bold, design: .rounded))
                                 .foregroundStyle(
                                     LinearGradient(
                                         gradient: Gradient(colors: [.red, .blue, .green, .yellow]),
@@ -39,7 +39,7 @@ struct HomepageView: View {
                                 .blur(radius: 5)
                                 .overlay(
                                     Text("ColorWorld")
-                                        .font(.system(size: 60, weight: .bold))
+                                        .font(.system(size: 60, weight: .bold, design: .rounded))
                                         .foregroundColor(.white)
                                 )
                                 .padding(.top, 20)
@@ -90,6 +90,7 @@ struct HomepageView: View {
             }
             .sheet(isPresented: $showInfoModal) {
                 ModalView(showInfoModal: $showInfoModal)
+                    .presentationDetents([.height(500)])
             }
         }
         .navigationBarBackButtonHidden(true)
