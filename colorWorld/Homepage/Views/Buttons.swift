@@ -16,13 +16,16 @@ struct Buttons: View {
     @Binding var selectedModel: SampleModel?
     @State private var imagePicker = ImagePicker()
     @State var viewModel: UpdateEditFormViewModel = UpdateEditFormViewModel()
+    @State private var showCamera = false
+    @State private var cameraError: CameraPermission.CameraError?
 
     var body: some View {
         if selectedCard == nil {
             HStack {
-                NavigationLink(destination: CameraView()) {
+                NavigationLink(
+                    destination: SelectedImage(imageData: selectedData, path: $path)) {
                     HStack {
-                        Text("Add photo")
+                        Text("Take photo")
                             .font(.title)
                             .foregroundStyle(
                                 LinearGradient(gradient: Gradient(colors:
@@ -36,8 +39,33 @@ struct Buttons: View {
                     .background(Color.white)
                     .cornerRadius(30)
                     .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
+                    .onTapGesture {
+                        if let error = CameraPermission.checkPermissions() {
+                            cameraError = error
+                        } else {
+                            showCamera.toggle()
+                        }
+                    }
+                    .alert(isPresented: .constant(cameraError != nil), error: cameraError) { _ in
+                            Button("OK") {
+                                cameraError = nil
+                            }
+                        } message: { error in
+                            Text(error.recoverySuggestion ?? "Try again later")
+                        }
+                    .sheet(isPresented: $showCamera) {
+                        UIKitCamera(selectedImage: $viewModel.cameraImage)
+                            .ignoresSafeArea()
+                    }
+                    .onChange(of: viewModel.cameraImage) {
+                        if let image = viewModel.cameraImage {
+                            viewModel.data = image.jpegData(compressionQuality: 0.8)
+                            selectedData = viewModel.data!
+                            path.append(selectedData)
+                        }
+                    }
                 }
-                NavigationLink(destination: SelectedImage(image: selectedData)) {
+                NavigationLink(destination: SelectedImage(imageData: selectedData, path: $path)) {
                     HStack {
                         Text("Upload photo")
                             .font(.title)
