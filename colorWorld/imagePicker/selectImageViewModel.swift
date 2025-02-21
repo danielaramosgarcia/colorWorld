@@ -13,6 +13,7 @@ class UpdateEditFormViewModel {
     var id: UUID = UUID()
     var name: String = ""
     var data: Data?
+    var date: Date = Date()
     var sample: SampleModel?
     var cameraImage: UIImage?
     var image: UIImage {
@@ -28,8 +29,8 @@ class UpdateEditFormViewModel {
         self.sample = sample
         self.name = sample.name
         self.data = sample.data
+        self.date = sample.date
         self.id = sample.id
-
     }
 
     @MainActor

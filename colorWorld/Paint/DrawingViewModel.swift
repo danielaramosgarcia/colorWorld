@@ -24,28 +24,10 @@ class DrawingViewModel: ObservableObject {
         canvas = PKCanvasView()
     }
 
-//    func saveImage() {
-//
-//        UIGraphicsBeginImageContextWithOptions(rect.size, false, 1)
-//        canvas.drawHierarchy(in: CGRect(origin: .zero, size: rect.size), afterScreenUpdates: true)
-//
-//        let generatedImage = UIGraphicsGetImageFromCurrentImageContext()
-//
-//        UIGraphicsGetImageFromCurrentImageContext()
-//
-//        UIGraphicsEndImageContext()
-//
-//        if let image = generatedImage {
-//            UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-//            print("Success!")
-//        }
-//
-//    }
-
     func saveImage() {
         // Verifica que el canvas tenga un tamaño válido y que la imagen de fondo sea correcta.
         guard canvas.bounds.size != .zero, let bgImage = UIImage(data: imageData) else {
-            print("Error: tamaño del canvas inválido o imagen de fondo no válida")
+            print("Error: canvas size invalid or iamge size invalid")
             return
         }
 
@@ -68,7 +50,7 @@ class DrawingViewModel: ObservableObject {
 
         // Guardar la imagen en la galería (asegúrate de tener el permiso NSPhotoLibraryAddUsageDescription en Info.plist)
         UIImageWriteToSavedPhotosAlbum(finalImage, nil, nil, nil)
-        print("Imagen guardada exitosamente!")
+        print("Saved succesfully!")
     }
 
 }

@@ -15,7 +15,7 @@ enum SwipeDirection {
 
 struct LoopingStack: View {
     // Consulta directa de modelos, sin pasar parámetros innecesarios.
-    @Query(sort: \SampleModel.name) var samples: [SampleModel]
+    @Query(sort: \SampleModel.date, order: .reverse) var samples: [SampleModel]
     var maxTranslationWidth: CGFloat? = 200
     var visibleCardsCount: Int = 5
 

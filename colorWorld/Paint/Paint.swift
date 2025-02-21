@@ -10,14 +10,18 @@ import PencilKit
 
 struct Paint: View {
     @Environment(\.modelContext) private var modelContext
-    var imageData: Data
-    var name: String
+    @State var viewModel: UpdateEditFormViewModel
     @Binding var path: [Data]
     @StateObject var model = DrawingViewModel()
+    @State private var navigateToHome: Bool = false
+    var isUpdate: Bool = false
+    var selectedModel: SampleModel?
 
     var body: some View {
         ZStack {
-            if let uiImage = UIImage(data: imageData) {
+            Gradiant()
+                .ignoresSafeArea()
+            if let uiImage = UIImage(data: viewModel.data!) {
                 Image(uiImage: uiImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -25,18 +29,38 @@ struct Paint: View {
             CanvasView(canvas: $model.canvas, toolPicker: $model.toolPicker, rect: UIScreen.main.bounds.size)
         }
         .onAppear {
-            model.imageData = imageData
+            model.imageData = viewModel.data!
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     model.saveImage()
-                    let newSample = SampleModel(id: UUID(), name: name, data: model.imageData)
-                    modelContext.insert(newSample)
-                    path = []
+
+                    if isUpdate {
+                        modelContext.delete(selectedModel!)
+                        try? modelContext.save()
+                        let newSample = SampleModel(id: UUID(), name: viewModel.name, data: model.imageData)
+                        modelContext.insert(newSample)
+                        print("LLEGO A UPDATE")
+                        navigateToHome = true
+                    } else {
+                        let newSample = SampleModel(id: UUID(), name: viewModel.name, data: model.imageData)
+                        modelContext.insert(newSample)
+                        print("LLEGO A NEW SAMPLE")
+                        navigateToHome = true
+                        path = []
+                    }
                 } label: {
                     Text("Save Art")
                 }
+                NavigationLink(
+                    destination: HomepageView(),
+                    isActive: $navigateToHome
+                ) {
+                    EmptyView()
+                }
+                .hidden()
+
             }
         }
     }
@@ -69,5 +93,7 @@ struct CanvasView: UIViewRepresentable {
     let peoniesImage = UIImage(named: "balon")
     let peoniesData = peoniesImage!.jpegData(compressionQuality: 1.0)
     @State var path: [Data] = []
-    Paint(imageData: peoniesData!, name: "Nuevo", path: $path)
+    @State var viewModel: UpdateEditFormViewModel = UpdateEditFormViewModel()
+    @State var isUpdate: Bool = false
+    Paint(viewModel: viewModel, path: $path, isUpdate: isUpdate)
 }

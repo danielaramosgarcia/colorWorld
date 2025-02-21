@@ -9,7 +9,7 @@ import SwiftUI
 import _SwiftData_SwiftUI
 
 struct ListView: View {
-    @Query(sort: \SampleModel.name) var samples: [SampleModel]
+    @Query(sort: \SampleModel.date, order: .reverse) var samples: [SampleModel]
     @Binding var selectedCard: Int?
     @Binding var selectedModel: SampleModel?
 

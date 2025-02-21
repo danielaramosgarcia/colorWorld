@@ -11,14 +11,13 @@ import Vision
 
 struct SelectedImage: View {
     var imageData: Data
-    @State private var nameInput: String = ""
     @State private var styledImage: UIImage?
     @State private var showNameError: Bool = false
     @State private var isLoading: Bool = false
     @Binding var path: [Data]
     @State private var navigateToPaint: Bool = false
-    
-    
+    @State var viewModel: UpdateEditFormViewModel = UpdateEditFormViewModel()
+
     var body: some View {
         let originalUIImage = UIImage(data: imageData)
 
@@ -33,7 +32,7 @@ struct SelectedImage: View {
                             .foregroundColor(.white)
                     }
 
-                    TextField("Name you art", text: $nameInput)
+                    TextField("Name you art", text: $viewModel.name)
                         .textInputAutocapitalization(.sentences)
                         .multilineTextAlignment(.center)
                         .disableAutocorrection(true)
@@ -108,10 +107,7 @@ struct SelectedImage: View {
             // NavigationLink oculto para pasar a Paint
             NavigationLink(
                 destination: Paint(
-                    imageData: (styledImage != nil
-                                ? styledImage!.jpegData(compressionQuality: 1.0)!
-                                : imageData),
-                    name: nameInput,
+                    viewModel: viewModel,
                     path: $path
                 ),
                 isActive: $navigateToPaint
@@ -124,7 +120,7 @@ struct SelectedImage: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     // Validación del nombre
-                    if nameInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    if viewModel.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         withAnimation { showNameError = true }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                             withAnimation { showNameError = false }
@@ -132,14 +128,17 @@ struct SelectedImage: View {
                         return
                     }
 
-                    // Si se está transformando, no permitimos navegar
+                    viewModel.data = (styledImage != nil
+                                ? styledImage!.jpegData(compressionQuality: 1.0)!
+                                : imageData)
+
                     if isLoading { return }
 
                     navigateToPaint = true
                 } label: {
                     Text("Let's paint")
                 }
-                // Se deshabilita el botón mientras esté cargando
+
                 .disabled(isLoading)
             }
         }
@@ -153,7 +152,7 @@ struct SelectedImage: View {
                 isLoading = true
             }
 
-            guard let model = try? good(configuration: MLModelConfiguration()) else {
+            guard let model = try? perfect(configuration: MLModelConfiguration()) else {
                 print("Error loading the style model")
                 DispatchQueue.main.async { isLoading = false }
                 return
@@ -161,23 +160,23 @@ struct SelectedImage: View {
             let targetSize = CGSize(width: 512, height: 512)
             guard let resizedImage = inputImage.resized(to: targetSize),
                   let pixelBuffer = resizedImage.toCVPixelBuffer(width: Int(targetSize.width), height: Int(targetSize.height)) else {
-                print("Error al convertir la imagen a pixel buffer")
+                print("Error with pixel buffer")
                 DispatchQueue.main.async { isLoading = false }
                 return
             }
             guard let output = try? model.prediction(image: pixelBuffer) else {
-                print("Error durante la predicción de estilo")
+                print("Error with style prediction")
                 DispatchQueue.main.async { isLoading = false }
                 return
             }
             guard let outputUIImage = UIImage(pixelBuffer: output.stylizedImage) else {
-                print("Error al convertir la salida del modelo a UIImage")
+                print("Error converting to UIImage")
                 DispatchQueue.main.async { isLoading = false }
                 return
             }
             let originalSize = inputImage.size
             guard let finalImage = outputUIImage.resized(to: originalSize) else {
-                print("Error al redimensionar la imagen de salida")
+                print("Error with resizing")
                 DispatchQueue.main.async { isLoading = false }
                 return
             }

@@ -14,8 +14,6 @@ struct ColorWorldApp: App {
         WindowGroup {
             HomepageView()
         }
-//        .modelContainer(for: SampleModel.self)
-        // good
         .modelContainer(SampleModel.preview)
 
     }

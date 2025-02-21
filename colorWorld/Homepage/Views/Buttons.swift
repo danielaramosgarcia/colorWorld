@@ -1,4 +1,3 @@
-//
 //  Buttons.swift
 //  colorWorld
 //
@@ -18,6 +17,7 @@ struct Buttons: View {
     @State var viewModel: UpdateEditFormViewModel = UpdateEditFormViewModel()
     @State private var showCamera = false
     @State private var cameraError: CameraPermission.CameraError?
+    @State private var navigateToPaint: Bool = false
 
     var body: some View {
         if selectedCard == nil {
@@ -123,6 +123,25 @@ struct Buttons: View {
                     .background(Color.white)
                     .cornerRadius(30)
                     .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 4)
+                    .onTapGesture {
+                        viewModel.id = selectedModel!.id
+                        viewModel.name = selectedModel!.name
+                        viewModel.data = selectedModel?.data
+                        selectedCard = nil
+                        navigateToPaint = true
+                    }
+                NavigationLink(
+                    destination: Paint(
+                        viewModel: viewModel,
+                        path: $path,
+                        isUpdate: true,
+                        selectedModel: selectedModel
+                    ),
+                    isActive: $navigateToPaint
+                ) {
+                    EmptyView()
+                }
+                .hidden()
 
                 HStack {
                     Text("Delete")

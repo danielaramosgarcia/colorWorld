@@ -10,7 +10,7 @@ import _SwiftData_SwiftUI
 
 struct GalleryView: View {
 
-    @Query(sort: \SampleModel.name) var samples: [SampleModel]
+    @Query(sort: \SampleModel.date, order: .reverse) var samples: [SampleModel]
     @Binding var selectedCard: Int?
     @Binding var selectedModel: SampleModel?
 

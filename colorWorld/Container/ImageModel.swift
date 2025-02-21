@@ -15,6 +15,7 @@ class SampleModel {
     var name: String
     @Attribute(.externalStorage)
     var data: Data?
+    var date: Date
     var img: UIImage? {
         if let data {
             return UIImage(data: data)
@@ -22,10 +23,11 @@ class SampleModel {
             return nil
         }
     }
-    init(id: UUID, name: String, data: Data? = nil) {
+    init(id: UUID, name: String, data: Data? = nil, date: Date = Date()) {
         self.id = id
         self.name = name
         self.data = data
+        self.date = date
     }
 }
 
@@ -40,15 +42,8 @@ extension SampleModel {
             let noCardsData = noCardsImage?.jpegData(compressionQuality: 1.0)
             let samples: [SampleModel] = [
                 .init(id: UUID(), name: "Boobie goods", data: noCardsData),
-                .init(id: UUID(), name: "Peonias", data: peoniesData), // Asignamos data
                 .init(id: UUID(), name: "Flowers", data: peoniesData),
-                .init(id: UUID(), name: "Boobie", data: noCardsData),
-                .init(id: UUID(), name: "Boobie goods", data: noCardsData),
-                .init(id: UUID(), name: "Peonias", data: peoniesData), // Asignamos data
-                .init(id: UUID(), name: "Flowers", data: peoniesData),
-                .init(id: UUID(), name: "Boobie", data: noCardsData),
-                .init(id: UUID(), name: "Peonias", data: peoniesData), // Asignamos data
-                .init(id: UUID(), name: "Flowers", data: peoniesData)
+                .init(id: UUID(), name: "Boobie", data: noCardsData)
             ]
             samples.forEach {
                 container.mainContext.insert($0)

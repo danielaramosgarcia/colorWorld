@@ -83,6 +83,7 @@ struct HomepageView: View {
                 SelectedImage(imageData: selectedImage, path: $path)
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
 
     private func tabButton(title: String, image: String, tag: Int) -> some View {
